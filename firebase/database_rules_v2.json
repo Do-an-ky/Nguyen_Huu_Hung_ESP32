@@ -1,0 +1,55 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "devices": {
+      "$deviceId": {
+        ".read": "auth != null",
+
+        "status": {
+          ".write": "auth != null",
+          ".validate": "newData.hasChildren(['state','accTotal','gyroTotal','tiltAngle','acked','timestamp','lastSeen'])",
+          "state":     { ".validate": "newData.isString() && (newData.val() === 'IDLE' || newData.val() === 'CHECKING' || newData.val() === 'ALARM')" },
+          "accTotal":  { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30" },
+          "gyroTotal": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 5000" },
+          "tiltAngle": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 180" },
+          "acked":     { ".validate": "newData.isBoolean()" },
+          "timestamp": { ".validate": "newData.isNumber()" },
+          "lastSeen":  { ".validate": "newData.isNumber()" },
+          "rssi":      { ".validate": "newData.isNumber() && newData.val() >= -120 && newData.val() <= 0" },
+          "uptime":    { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "fw":        { ".validate": "newData.isString() && newData.val().length <= 16" },
+          "$other":    { ".validate": false }
+        },
+
+        "command": {
+          ".write": "auth != null",
+          ".validate": "newData.hasChildren(['cmd','id'])",
+          "cmd": { ".validate": "newData.isString() && (newData.val() === 'NONE' || newData.val() === 'ACK' || newData.val() === 'RESET' || newData.val() === 'TEST')" },
+          "id":  { ".validate": "newData.isNumber() && (!data.exists() || newData.val() > data.val())" },
+          "$other": { ".validate": false }
+        },
+
+        "events": {
+          ".indexOn": ["at"],
+          "$eventId": {
+            ".write": "auth != null && !data.exists() && newData.exists()",
+            ".validate": "newData.hasChildren(['trigger','peakAcc','peakGyro','tiltChange','at'])",
+            "trigger":        { ".validate": "newData.isString() && (newData.val() === 'FREEFALL' || newData.val() === 'HARD_IMPACT' || newData.val() === 'SOS' || newData.val() === 'TEST')" },
+            "peakAcc":        { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30" },
+            "peakGyro":       { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 5000" },
+            "tiltChange":     { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 180" },
+            "freefallMs":     { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 60000" },
+            "impactToRestMs": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 60000" },
+            "timestamp":      { ".validate": "newData.isNumber()" },
+            "at":             { ".validate": "newData.isNumber()" },
+            "$other":         { ".validate": false }
+          }
+        },
+
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}
